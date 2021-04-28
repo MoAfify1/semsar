@@ -72,7 +72,7 @@ export class TransactionsService {
       this.trans.count(),
     ]);
     return {
-      totlaOutcome: totalout,
+      totalOutcome: totalout,
       totalIncome: totalin,
       profit: total,
       clients: result[0],
