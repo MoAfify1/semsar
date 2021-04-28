@@ -28,13 +28,13 @@ export class Transactions {
   paperSentToClient: boolean;
   @Prop()
   sentPaperDate: Date;
-  @Prop()
+  @Prop({default:0})
   sellCash: number;
   @Prop({})
   sellDate: Date;
   @Prop()
   paper: string;
-  @Prop()
+  @Prop({default:0})
   profit: number;
   @Prop()
   productType: string;
