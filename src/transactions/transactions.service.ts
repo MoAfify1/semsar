@@ -23,7 +23,7 @@ export class TransactionsService {
     return new this.trans(createTransactionDto).save();
   }
 
-  async findAll(page:number) {
+  async findAll(page :number=0) {
     const length=await this.trans.find().countDocuments()
     const result=await this.trans.find().skip((+page-1)*10).limit(10).populate('client').populate('dealer').exec();
     return {lastPage:Math.ceil(length/10),transations:result}
