@@ -19,15 +19,33 @@ export class TransactionsService {
     const client = await this.client.nationalId(
       createTransactionDto.nationalId
     );
+    const {name,sellCash,sellDate,phoneNumber}=createTransactionDto
+
+    if(name && sellCash && sellDate && phoneNumber){
+      const dealer = await this.dealer.findByname(name);
+      const profit = +sellCash - +createTransactionDto.purchaseCash;
+      const dealerObj={name:name,phoneNumber:phoneNumber}
+      createTransactionDto.profit=profit
+      if (dealer) {
+        createTransactionDto.dealer=dealer._id
+        return new this.trans(createTransactionDto).save();
+      }
+      const tempdealer=await this.dealer.create(dealerObj);
+      createTransactionDto.dealer=tempdealer._id
+    }
+    delete createTransactionDto.name
+    delete createTransactionDto.sellCash
+    delete createTransactionDto.sellDate
+    delete createTransactionDto.phoneNumber
+
     createTransactionDto.client = client._id;
-    const tr= await new this.trans(createTransactionDto).save();
-    return await this.trans.findOne({_id:tr._id}).populate('client').exec()
+    return (await new this.trans(createTransactionDto).save()).populate('client').populate('dealer').execPopulate();
   }
 
-  async findAll(page :number=0) {
+  async findAll(page:number) {
     const length=await this.trans.find().countDocuments()
     const result=await this.trans.find().skip((+page-1)*10).limit(10).populate('client').populate('dealer').exec();
-    return {lastPage:Math.ceil(length/10),transactions:result}
+    return {lastPage:Math.ceil(length/10),transations:result}
   }
   async search(search: SearchDto) {
     if (search.nationalId) {
@@ -73,7 +91,7 @@ export class TransactionsService {
       this.trans.count(),
     ]);
     return {
-      totalOutcome: totalout,
+      totlaOutcome: totalout,
       totalIncome: totalin,
       profit: total,
       clients: result[0],
@@ -99,15 +117,16 @@ export class TransactionsService {
     const dealer = await this.dealer.findByname(dealerObj.name);
     if (dealer) {
       return await this.trans.findOneAndUpdate(
-        { _id: dealer._id },
-        { profit: profit },
+        { _id: id },
+        { profit: profit,dealer:dealer._id },
         { new: true },
       );
     }
+
     await this.dealer.create(dealerObj);
     return this.trans.findOneAndUpdate(
       { _id: id },
-      { profit: profit },
+      { profit: profit,dealer:dealer._id },
       { new: true },
     );
   }
