@@ -20,7 +20,8 @@ export class TransactionsService {
       createTransactionDto.nationalId
     );
     createTransactionDto.client = client._id;
-    return new this.trans(createTransactionDto).save();
+    const tr= await new this.trans(createTransactionDto).save();
+    return await this.trans.findOne({_id:tr._id}).populate('client').exec()
   }
 
   async findAll(page :number=0) {
